@@ -1,12 +1,14 @@
 package com.bo.playav.view
 
 import android.Manifest
+import android.hardware.Camera
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceHolder
 import com.bo.playav.databinding.ActivityCameraRecorderBinding
+import com.bo.playav.toHex
 import com.hjq.permissions.XXPermissions
 import java.lang.Exception
 
@@ -15,13 +17,11 @@ class CameraRecorderActivity : AppCompatActivity() {
     private val TAG: String = "CameraRecorderActivity"
     private lateinit var binding: ActivityCameraRecorderBinding
     private var camera:android.hardware.Camera? = null
+    private var byteBuffer: ByteArray? = null
 
     private val callback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(p0: SurfaceHolder) {
-            camera?.apply {
-                setPreviewDisplay(p0)
-                startPreview()
-            }
+            startPreview(p0)
         }
 
         override fun surfaceChanged(holder: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
@@ -32,13 +32,20 @@ class CameraRecorderActivity : AppCompatActivity() {
             camera?.apply {
                 stopPreview()
 
-                setPreviewDisplay(holder)
-                startPreview()
+                startPreview(holder)
             }
         }
 
         override fun surfaceDestroyed(p0: SurfaceHolder) {
             camera?.release()
+        }
+    }
+
+    private val previewCallback = object : Camera.PreviewCallback {
+        override fun onPreviewFrame(p0: ByteArray?, p1: Camera?) {
+            camera?.apply {
+                addCallbackBuffer(byteBuffer)
+            }
         }
     }
 
@@ -49,18 +56,34 @@ class CameraRecorderActivity : AppCompatActivity() {
 
         binding.preview.holder.addCallback(callback)
         if (XXPermissions.isGranted(this, Manifest.permission.CAMERA )) {
-            initCamera()
+            createCamera()
         } else {
             checkPermission()
         }
 
+        Log.e(TAG, "xxxx")
     }
 
-    fun initCamera() {
+    fun createCamera() {
         try {
-            camera = android.hardware.Camera.open(android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT)
+            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
+            camera?.let {
+                val size = it.parameters.previewSize
+                byteBuffer = ByteArray(size.width * size.height * 3/2)
+            }
+
         } catch (e:Exception) {
             Log.e(TAG, "open front camera failed. cause of ${e.message}")
+        }
+    }
+
+    fun startPreview(holder: SurfaceHolder) {
+        camera?.apply {
+            setDisplayOrientation(90)
+            addCallbackBuffer(byteBuffer)
+            setPreviewCallbackWithBuffer(previewCallback)
+            setPreviewDisplay(holder)
+            startPreview()
         }
     }
 
@@ -69,7 +92,7 @@ class CameraRecorderActivity : AppCompatActivity() {
             XXPermissions.with(this)
                 .permission(Manifest.permission.CAMERA)
                 .request { permissions, all -> {
-                    initCamera()
+                    createCamera()
                 } }
         }
     }

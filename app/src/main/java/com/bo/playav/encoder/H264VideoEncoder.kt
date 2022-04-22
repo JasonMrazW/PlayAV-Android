@@ -5,6 +5,7 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
 import android.view.Surface
+import com.bo.playav.toHex
 import java.util.concurrent.atomic.AtomicBoolean
 
 class H264VideoEncoder : Runnable{
@@ -34,7 +35,6 @@ class H264VideoEncoder : Runnable{
         running.set(false)
     }
 
-    fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
     override fun run() {
         codec.start()
