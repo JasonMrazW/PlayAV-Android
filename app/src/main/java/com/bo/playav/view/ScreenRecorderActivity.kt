@@ -4,6 +4,7 @@ import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -32,12 +33,17 @@ class ScreenRecorderActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityScreenRecorderBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initScreen()
     }
 
-    fun initScreen() {
+
+    fun start(view: View) {
         val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         val intent = projectionManager.createScreenCaptureIntent()
         startForResult.launch(intent)
+    }
+
+    fun stop(view: View) {
+        val intent = Intent(this, ScreenRecorderService::class.java)
+        stopService(intent)
     }
 }
