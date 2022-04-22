@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceHolder
 import com.bo.playav.databinding.ActivityCameraRecorderBinding
+import com.bo.playav.encoder.H264FrameVideoEncoder
 import com.bo.playav.toHex
 import com.hjq.permissions.XXPermissions
 import java.lang.Exception
@@ -18,6 +19,7 @@ class CameraRecorderActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraRecorderBinding
     private var camera:android.hardware.Camera? = null
     private var byteBuffer: ByteArray? = null
+    private var encoder:H264FrameVideoEncoder? = null
 
     private val callback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(p0: SurfaceHolder) {
@@ -43,7 +45,16 @@ class CameraRecorderActivity : AppCompatActivity() {
 
     private val previewCallback = object : Camera.PreviewCallback {
         override fun onPreviewFrame(p0: ByteArray?, p1: Camera?) {
+
+
             camera?.apply {
+                if (encoder == null) {
+                    encoder = H264FrameVideoEncoder()
+                    encoder?.start(parameters.previewSize.width, parameters.previewSize.height)
+                }
+                p0?.apply {
+                    encoder?.encodeFrame(this)
+                }
                 addCallbackBuffer(byteBuffer)
             }
         }

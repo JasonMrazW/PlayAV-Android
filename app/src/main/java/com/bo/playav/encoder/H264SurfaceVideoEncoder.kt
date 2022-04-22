@@ -8,11 +8,12 @@ import android.view.Surface
 import com.bo.playav.toHex
 import java.util.concurrent.atomic.AtomicBoolean
 
-class H264VideoEncoder : Runnable{
+class H264SurfaceVideoEncoder : Runnable{
     private val TAG: String = "encoder"
     private lateinit var surface: Surface
     private lateinit var codec: MediaCodec
     private var running: AtomicBoolean = AtomicBoolean(false)
+
 
     fun start():Surface {
         codec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)

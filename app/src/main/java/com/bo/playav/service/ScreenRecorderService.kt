@@ -12,7 +12,7 @@ import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import com.bo.playav.R
-import com.bo.playav.encoder.H264VideoEncoder
+import com.bo.playav.encoder.H264SurfaceVideoEncoder
 
 import com.bo.playav.view.MainActivity
 
@@ -22,7 +22,7 @@ import com.bo.playav.view.MainActivity
 class ScreenRecorderService : Service() {
 
     private lateinit var projection:MediaProjection
-    private lateinit var encoder: H264VideoEncoder
+    private lateinit var encoder: H264SurfaceVideoEncoder
 
     override fun onBind(intent: Intent): IBinder {
         //do nothing
@@ -39,7 +39,7 @@ class ScreenRecorderService : Service() {
                 //init encoder
                 createNotificationChannel()
                 projection = projectionManager.getMediaProjection(resultCode, it)
-                encoder = H264VideoEncoder()
+                encoder = H264SurfaceVideoEncoder()
                 val destSurface = encoder.start()
 
                 projection.createVirtualDisplay(
