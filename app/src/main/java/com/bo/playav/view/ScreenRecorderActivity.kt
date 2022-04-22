@@ -1,36 +1,38 @@
 package com.bo.playav.view
 
-import android.media.projection.MediaProjection
+import android.content.Intent
 import android.media.projection.MediaProjectionManager
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.bo.playav.R
+import androidx.core.content.ContextCompat
+import com.bo.playav.databinding.ActivityScreenRecorderBinding
+import com.bo.playav.service.ScreenRecorderService
 
 class ScreenRecorderActivity : AppCompatActivity() {
-
-    var projection: MediaProjection? = null
 
     val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         result: ActivityResult ->
         run {
-            val projectionManager =
-                getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-            projection =
-                result.data?.let { projectionManager.getMediaProjection(result.resultCode, it) }
-            startRecorder()
+            startRecorder(result.resultCode, result.data)
         }
     }
 
-    private fun startRecorder() {
-        // do something
+    private lateinit var binding: ActivityScreenRecorderBinding
+
+    private fun startRecorder(resultCode:Int, resultData: Intent?) {
+        val intent = Intent(this, ScreenRecorderService::class.java)
+        intent.putExtra("data", resultData)
+        intent.putExtra("resultCode", resultCode)
+        ContextCompat.startForegroundService(this, intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_screen_recorder)
+        binding = ActivityScreenRecorderBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        initScreen()
     }
 
     fun initScreen() {

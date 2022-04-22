@@ -5,11 +5,12 @@ import android.os.Bundle
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.bo.playav.R
+import com.bo.playav.databinding.ActivityH264PlayerBinding
 import com.bo.playav.player.H264Player
 
 class H264PlayerActivity : AppCompatActivity() {
     private val TAG: String = "MainActivity2"
-    private lateinit var preview: SurfaceView
+    private lateinit var binding: ActivityH264PlayerBinding
     private lateinit var h264Player: H264Player
 
     private val callback = object : SurfaceHolder.Callback {
@@ -30,10 +31,10 @@ class H264PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_h264_player)
+        binding = ActivityH264PlayerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        preview = findViewById<SurfaceView>(R.id.preview)
-        preview.holder.addCallback(callback)
+        binding.preview.holder.addCallback(callback)
         h264Player = H264Player(assets)
     }
 }
