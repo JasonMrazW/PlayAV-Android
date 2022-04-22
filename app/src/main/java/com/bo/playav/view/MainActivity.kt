@@ -22,5 +22,9 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, ScreenRecorderActivity::class.java))
     }
 
+    fun playCameraRecorder(view: android.view.View) {
+        startActivity(Intent(this, CameraRecorderActivity::class.java))
+    }
+
 
 }

@@ -22,4 +22,13 @@
         android:layout_below="@+id/h264player"
         android:layout_alignLeft="@+id/h264player"
         android:onClick="playScreenRecorder"/>
+
+    <Button
+        android:id="@+id/cameraRecorder"
+        android:layout_width="200dp"
+        android:layout_height="64dp"
+        android:text="摄像头"
+        android:layout_below="@+id/screenRecorder"
+        android:layout_alignLeft="@+id/screenRecorder"
+        android:onClick="playCameraRecorder"/>
 </RelativeLayout>

@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/layout/activity_camera_recorder.xml" value="0.17708333333333334" />
         <entry key="app/src/main/res/layout/activity_h264_player.xml" value="0.12462006079027356" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.13179347826086957" />
         <entry key="app/src/main/res/layout/activity_screen_recorder.xml" value="0.12968591691995948" />
