@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PlayAVAndroid">
         <activity
+            android:name=".view.H264PlayerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.ScreenRecorderActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
