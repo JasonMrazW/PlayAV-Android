@@ -8,9 +8,11 @@ import android.os.Build
 import android.app.*
 
 import android.graphics.BitmapFactory
+import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import com.bo.playav.R
+import com.bo.playav.encoder.H264VideoEncoder
 
 import com.bo.playav.view.MainActivity
 
@@ -20,6 +22,7 @@ import com.bo.playav.view.MainActivity
 class ScreenRecorderService : Service() {
 
     private lateinit var projection:MediaProjection
+    private lateinit var encoder: H264VideoEncoder
 
     override fun onBind(intent: Intent): IBinder {
         //do nothing
@@ -27,17 +30,32 @@ class ScreenRecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intent?.let {
+        intent?.let { it ->
             val data = it.getParcelableExtra<Intent>("data")
             val resultCode = it.getIntExtra("resultCode", -1)
             val projectionManager =
                 getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             data?.let {
+                //init encoder
                 createNotificationChannel()
-                projection =projectionManager.getMediaProjection(resultCode, it)
+                projection = projectionManager.getMediaProjection(resultCode, it)
+                encoder = H264VideoEncoder()
+                val destSurface = encoder.start()
+
+                projection.createVirtualDisplay(
+                    "my screen recorder",
+                    1080,1980,2,DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
+                    destSurface, null, null
+                )
             }
         }
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        projection.stop()
+        encoder.stop()
     }
 
     private fun createNotificationChannel() {
