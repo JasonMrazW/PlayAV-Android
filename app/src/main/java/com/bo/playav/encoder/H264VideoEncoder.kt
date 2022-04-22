@@ -34,19 +34,6 @@ class H264VideoEncoder : Runnable{
         running.set(false)
     }
 
-    val hexChars = "0123456789abcdef".toCharArray()
-
-    fun ByteArray.toHex4(): String {
-        val hex = CharArray(2 * this.size)
-        this.forEachIndexed { i, byte ->
-            val unsigned = 0xff and byte.toInt()
-            hex[2 * i] = hexChars[unsigned / 16]
-            hex[2 * i + 1] = hexChars[unsigned % 16]
-        }
-
-        return hex.joinToString("")
-    }
-
     fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
     override fun run() {
