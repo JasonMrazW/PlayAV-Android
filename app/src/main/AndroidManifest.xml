@@ -21,14 +21,16 @@
             android:name=".service.ScreenRecorderService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection" />
+            android:foregroundServiceType="mediaProjection"
+            />
 
         <activity
             android:name=".view.H264PlayerActivity"
             android:exported="false" />
         <activity
             android:name=".view.ScreenRecorderActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".view.MainActivity"
             android:exported="true">

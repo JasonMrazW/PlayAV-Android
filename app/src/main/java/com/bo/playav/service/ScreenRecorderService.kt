@@ -15,8 +15,7 @@ import com.bo.playav.R
 import com.bo.playav.encoder.H264SurfaceVideoEncoder
 
 import com.bo.playav.view.MainActivity
-
-
+import com.bo.playav.view.ScreenRecorderActivity
 
 
 class ScreenRecorderService : Service() {
@@ -60,7 +59,7 @@ class ScreenRecorderService : Service() {
 
     private fun createNotificationChannel() {
         val builder: Notification.Builder = Notification.Builder(this.applicationContext) //获取一个Notification构造器
-        val nfIntent = Intent(this, MainActivity::class.java) //点击后跳转的界面，可以设置跳转数据
+        val nfIntent = Intent(this, ScreenRecorderActivity::class.java) //点击后跳转的界面，可以设置跳转数据
         builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0)) // 设置PendingIntent
             .setLargeIcon(
                 BitmapFactory.decodeResource(

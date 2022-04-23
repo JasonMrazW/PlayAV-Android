@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.bo.playav.databinding.ActivityCameraRecorderBinding
 import com.bo.playav.encoder.H264FrameVideoEncoder
-import com.bo.playav.toHex
 import com.hjq.permissions.XXPermissions
 import java.lang.Exception
 
