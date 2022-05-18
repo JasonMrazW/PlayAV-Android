@@ -12,7 +12,7 @@
         android:layout_height="64dp"
         android:text="开始录屏"
         android:onClick="start"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerInParent="true"/>
 
     <Button
         android:id="@+id/stop"

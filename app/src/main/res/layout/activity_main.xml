@@ -12,6 +12,7 @@
         android:layout_height="64dp"
         android:text="播放H264文件"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:onClick="playH264"/>
 
     <Button

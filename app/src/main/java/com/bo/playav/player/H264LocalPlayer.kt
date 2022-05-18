@@ -7,7 +7,7 @@ import android.util.Log
 import android.view.Surface
 import java.util.concurrent.atomic.AtomicBoolean
 
-class H264Player(var assets: AssetManager) : Runnable{
+class H264LocalPlayer(var assets: AssetManager) : Runnable{
     private val TAG: String = "H264Player"
     lateinit var surface: Surface
     lateinit var codec: MediaCodec

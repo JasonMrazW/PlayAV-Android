@@ -13,7 +13,7 @@ import com.bo.playav.service.ScreenRecorderService
 
 class ScreenRecorderActivity : AppCompatActivity() {
 
-    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         result: ActivityResult ->
         run {
             startRecorder(result.resultCode, result.data)

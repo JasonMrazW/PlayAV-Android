@@ -13,6 +13,7 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import com.bo.playav.R
 import com.bo.playav.encoder.H264SurfaceVideoEncoder
+import com.bo.playav.net.LiveSocketServer
 
 import com.bo.playav.view.MainActivity
 import com.bo.playav.view.ScreenRecorderActivity
@@ -22,6 +23,7 @@ class ScreenRecorderService : Service() {
 
     private lateinit var projection:MediaProjection
     private lateinit var encoder: H264SurfaceVideoEncoder
+    private lateinit var socketServer: LiveSocketServer
 
     override fun onBind(intent: Intent): IBinder {
         //do nothing
@@ -39,9 +41,13 @@ class ScreenRecorderService : Service() {
                 createNotificationChannel()
                 projection = projectionManager.getMediaProjection(resultCode, it)
                 encoder = H264SurfaceVideoEncoder()
+                socketServer = LiveSocketServer(9015)
+                encoder.setOnDataEncodedListener(socketServer)
+                socketServer.start()
+
                 val destSurface = encoder.start()
 
-                projection.createVirtualDisplay(
+                val virtualDisplay = projection.createVirtualDisplay(
                     "my screen recorder",
                     1080,1980,2,DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                     destSurface, null, null
@@ -55,6 +61,7 @@ class ScreenRecorderService : Service() {
         super.onDestroy()
         projection.stop()
         encoder.stop()
+        socketServer.stop(1000)
     }
 
     private fun createNotificationChannel() {

@@ -2,6 +2,7 @@ package com.bo.playav.view
 
 import android.Manifest
 import android.hardware.Camera
+import android.hardware.camera2.CameraManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -95,6 +96,7 @@ class CameraRecorderActivity : AppCompatActivity() {
             setPreviewDisplay(holder)
             startPreview()
         }
+
     }
 
     fun checkPermission() {
