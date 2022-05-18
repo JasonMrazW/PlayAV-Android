@@ -9,6 +9,7 @@ import android.app.*
 
 import android.graphics.BitmapFactory
 import android.hardware.display.DisplayManager
+import android.media.MediaFormat
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import com.bo.playav.R
@@ -41,6 +42,7 @@ class ScreenRecorderService : Service() {
                 createNotificationChannel()
                 projection = projectionManager.getMediaProjection(resultCode, it)
                 encoder = H264SurfaceVideoEncoder()
+                encoder.setCodecType(MediaFormat.MIMETYPE_VIDEO_HEVC)
                 socketServer = LiveSocketServer(9015)
                 encoder.setOnDataEncodedListener(socketServer)
                 socketServer.start()

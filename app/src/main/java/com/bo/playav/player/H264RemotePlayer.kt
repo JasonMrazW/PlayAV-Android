@@ -19,12 +19,12 @@ class H264RemotePlayer : Runnable , LiveSocketClient.OnSocketClientListener {
     val running:AtomicBoolean = AtomicBoolean(false)
 
     fun start(surface: Surface) {
-        val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC,1080, 1920)
+        val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC,1080, 1920)
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 30)
         format.setInteger(MediaFormat.KEY_BIT_RATE, 2000*1000)
         try {
-            codec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
+            codec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_HEVC)
             codec.configure(format, surface, null, 0)
         } catch (ex:Exception) {
             Log.d("player", "init decoder failed: ${ex.message}")
