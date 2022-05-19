@@ -1,18 +1,17 @@
 package com.bo.playav.net
 
-import android.net.Uri
 import android.util.Log
+import com.bo.playav.encoder.OnDataEncodedListener
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.lang.Exception
 import java.net.URI
 import java.nio.ByteBuffer
 
-class LiveSocketClient(uri:URI):WebSocketClient(uri) {
-    var messageListener:OnSocketClientListener ? = null
+class LiveSocketClient(uri:URI):WebSocketClient(uri), OnDataEncodedListener {
+    var messageListener:OnReceiveMessageListener ? = null
 
     override fun onOpen(handshakedata: ServerHandshake?) {
-
     }
 
     override fun onMessage(message: String?) {
@@ -34,14 +33,23 @@ class LiveSocketClient(uri:URI):WebSocketClient(uri) {
     }
 
     override fun onError(ex: Exception?) {
-
+        Log.d("player", "send 222error: ${ex?.message}")
     }
 
-    fun setReceiveListener(listener: OnSocketClientListener) {
+    fun setReceiveListener(listener: OnReceiveMessageListener) {
         messageListener = listener
     }
 
-    interface OnSocketClientListener {
-        fun onReceive(message: ByteBuffer?)
+    override fun onDataEncoded(data: ByteBuffer) {
+        //send data to server
+        if (isOpen) {
+            Log.d("player", "send data: ${data?.get(0)} " +
+                    " ${data?.get(1)}" +
+                    " ${data?.get(2)}" +
+                    " ${data?.get(3)}" +
+                    " ${data?.get(4)}" +
+                    " ${data?.get(5)}" + "size: ${data?.remaining()}")
+            send(data)
+        }
     }
 }

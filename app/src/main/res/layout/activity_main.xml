@@ -32,4 +32,22 @@
         android:layout_below="@+id/screenRecorder"
         android:layout_alignLeft="@+id/screenRecorder"
         android:onClick="playCameraRecorder"/>
+
+    <Button
+        android:id="@+id/videoConnectionRecorder"
+        android:layout_width="200dp"
+        android:layout_height="64dp"
+        android:text="视频通话"
+        android:layout_below="@+id/cameraRecorder"
+        android:layout_alignLeft="@+id/screenRecorder"
+        android:onClick="playVideoConnectionRecorder"/>
+
+    <Button
+        android:id="@+id/videoConnectionClientRecorder"
+        android:layout_width="200dp"
+        android:layout_height="64dp"
+        android:text="视频通话"
+        android:layout_below="@+id/videoConnectionRecorder"
+        android:layout_alignLeft="@+id/screenRecorder"
+        android:onClick="playVideoConnectionClientRecorder"/>
 </RelativeLayout>

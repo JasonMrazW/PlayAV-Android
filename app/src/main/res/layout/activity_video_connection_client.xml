@@ -5,11 +5,19 @@
     android:layout_height="match_parent"
     tools:context=".view.VideoConnectionActivity">
 
+    <Button
+        android:id="@+id/call"
+        android:text="call"
+        android:layout_width="160dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:onClick="callServer"/>
 
     <SurfaceView
         android:id="@+id/preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        />
 
     <SurfaceView
         android:id="@+id/self_preview"

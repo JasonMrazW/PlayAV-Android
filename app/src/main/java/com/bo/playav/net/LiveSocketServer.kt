@@ -1,7 +1,7 @@
 package com.bo.playav.net
 
 import android.util.Log
-import com.bo.playav.encoder.H264SurfaceVideoEncoder
+import com.bo.playav.encoder.OnDataEncodedListener
 import org.java_websocket.WebSocket
 import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
@@ -9,9 +9,13 @@ import java.lang.Exception
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 
-class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), H264SurfaceVideoEncoder.OnDataEncodedListener {
+class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), OnDataEncodedListener {
     var client: WebSocket? = null
+    private var listener:OnReceiveMessageListener? = null
 
+    fun setOnReceiveMessageListener(l: OnReceiveMessageListener) {
+        listener = l
+    }
 
     override fun onOpen(conn: WebSocket?, handshake: ClientHandshake?) {
         Log.d("socket", "connect new client!!")
@@ -27,8 +31,14 @@ class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), H264
 
     }
 
+    override fun onMessage(conn: WebSocket?, message: ByteBuffer?) {
+        //收到对方发来的消息
+        Log.d("socket", "receive.. ${message?.remaining()}")
+        listener?.onReceive(message)
+    }
+
     override fun onError(conn: WebSocket?, ex: Exception?) {
-        ex?.message?.let { Log.d("socket", it) }
+        ex?.message?.let { Log.d("socket", "hhhh $it") }
     }
 
     override fun onStart() {
@@ -36,15 +46,7 @@ class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), H264
     }
 
     override fun onDataEncoded(data: ByteBuffer) {
-
-//        Log.d("socket", "data ${data.remaining()}")
-
         client?.send(data)
-//        Log.d("player", "send: ${data.get(0)} " +
-//                " ${data.get(1)}" +
-//                " ${data.get(2)}" +
-//                " ${data.get(3)}" +
-//                " ${data.get(4)}" +
-//                " ${data.get(5)}")
+        //Log.d("socket", "send  ${data.remaining()}")
     }
 }

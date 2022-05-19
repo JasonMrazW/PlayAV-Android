@@ -17,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PlayAVAndroid">
         <activity
+            android:name=".view.VideoConnectionClientActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.VideoConnectionActivity"
             android:exported="false" />
         <activity

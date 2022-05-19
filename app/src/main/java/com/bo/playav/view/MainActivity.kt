@@ -26,5 +26,11 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, CameraRecorderActivity::class.java))
     }
 
+    fun playVideoConnectionRecorder(view: android.view.View) {
+        startActivity(Intent(this, VideoConnectionActivity::class.java))
+    }
+    fun playVideoConnectionClientRecorder(view: android.view.View) {
+        startActivity(Intent(this, VideoConnectionClientActivity::class.java))
+    }
 
 }

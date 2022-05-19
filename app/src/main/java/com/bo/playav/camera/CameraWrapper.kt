@@ -41,9 +41,9 @@ class CameraWrapper(private val preview: SurfaceView) {
         })
     }
 
-    fun createCamera() {
+    private fun createCamera() {
         try {
-            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT)
+            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
             camera?.let {
                 val size = it.parameters.previewSize
                 byteBuffer = ByteArray(size.width * size.height * 3/2)
@@ -54,10 +54,17 @@ class CameraWrapper(private val preview: SurfaceView) {
         }
     }
 
-    fun startPreview(holder: SurfaceHolder) {
+    private fun startPreview(holder: SurfaceHolder) {
         camera?.apply {
             setDisplayOrientation(90)
             addCallbackBuffer(byteBuffer)
+            parameters.setPreviewFpsRange(30000,30000)
+//            for (i  in parameters.supportedPreviewFpsRange) {
+//                for (j in i) {
+//                    Log.d("fps", "range: $j")
+//                }
+//                Log.d("fps", "======")
+//            }
             setPreviewCallbackWithBuffer(previewCallback)
             setPreviewDisplay(holder)
             startPreview()
@@ -88,8 +95,10 @@ class CameraWrapper(private val preview: SurfaceView) {
 
     private val previewCallback = object : Camera.PreviewCallback {
         override fun onPreviewFrame(p0: ByteArray?, p1: Camera?) {
+            Log.d("camerawrapper", "frame has bean render")
+
             p0?.apply {
-                previewFrameListener?.onPreviewFrame(this)
+                previewFrameListener?.onPreviewFrame(this, p1)
             }
 
             p1?.apply {
@@ -104,6 +113,6 @@ class CameraWrapper(private val preview: SurfaceView) {
 
 
     interface OnPreviewFrameListener {
-        fun onPreviewFrame(data: ByteArray)
+        fun onPreviewFrame(data: ByteArray, camera:Camera?)
     }
 }

@@ -42,7 +42,7 @@ class ScreenRecorderService : Service() {
                 createNotificationChannel()
                 projection = projectionManager.getMediaProjection(resultCode, it)
                 encoder = H264SurfaceVideoEncoder()
-                encoder.setCodecType(MediaFormat.MIMETYPE_VIDEO_HEVC)
+                encoder.setCodecType(MediaFormat.MIMETYPE_VIDEO_AVC)
                 socketServer = LiveSocketServer(9015)
                 encoder.setOnDataEncodedListener(socketServer)
                 socketServer.start()

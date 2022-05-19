@@ -115,8 +115,4 @@ class H264SurfaceVideoEncoder : Runnable{
         }
         codec.stop()
     }
-
-    interface OnDataEncodedListener {
-        fun onDataEncoded(data: ByteBuffer)
-    }
 }
