@@ -21,6 +21,11 @@ class H264SurfaceVideoEncoder : Runnable{
     private lateinit var sps_pps_buffer: ByteArray
     private var codecType:String = MediaFormat.MIMETYPE_VIDEO_AVC
 
+    private val AVC_I_TYPE = 5
+    private val AVC_SPS_TYPE = 7
+    private val HEVC_I_TYPE = 19
+    private val HEVC_VPS_TYPE = 32
+
     fun start():Surface {
         codec = MediaCodec.createEncoderByType(codecType)
         val format: MediaFormat = MediaFormat.createVideoFormat(codecType,
@@ -67,16 +72,16 @@ class H264SurfaceVideoEncoder : Runnable{
                         offset = 3
                     }
 
-
+                    var type:Int
                     when (codecType) {
                         MediaFormat.MIMETYPE_VIDEO_HEVC -> {
                             //sps
-                            var type = (it.get(offset).toInt() and  0x7E) shr  1
+                           type = (it.get(offset).toInt() and  0x7E) shr  1
                             //vps
-                            if (type == 32) {
+                            if (type == HEVC_VPS_TYPE) {
                                 sps_pps_buffer = ByteArray(it.remaining())
                                 it.get(sps_pps_buffer)
-                            } else if (type == 19) {
+                            } else if (type == HEVC_I_TYPE) {
                                 val ret = ByteBuffer.allocate(sps_pps_buffer.size)
                                 ret.put(sps_pps_buffer, 0, sps_pps_buffer.size)
                                 ret.flip()
@@ -89,10 +94,10 @@ class H264SurfaceVideoEncoder : Runnable{
                         MediaFormat.MIMETYPE_VIDEO_AVC -> {
                             //sps
                             var type = it.get(offset).toInt() and  0x1F
-                            if (type == 7) {
+                            if (type == AVC_SPS_TYPE) {
                                 sps_pps_buffer = ByteArray(it.remaining())
                                 it.get(sps_pps_buffer)
-                            } else if (type == 5) {
+                            } else if (type == AVC_I_TYPE) {
                                 val ret = ByteBuffer.allocate(sps_pps_buffer.size)
                                 ret.put(sps_pps_buffer, 0, sps_pps_buffer.size)
                                 ret.flip()
