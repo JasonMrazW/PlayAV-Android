@@ -46,6 +46,11 @@ class VideoConnectionActivity : AppCompatActivity() {
         checkPermission()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraWrapper.release()
+    }
+
     private fun checkPermission() {
         val context = this
         XXPermissions.with(this) // 不适配 Android 11 可以这样写
@@ -82,11 +87,17 @@ class VideoConnectionActivity : AppCompatActivity() {
         override fun surfaceDestroyed(p0: SurfaceHolder) {
             remotePlayer?.stop()
             socketServer?.stop()
+            encoder?.stop()
+            socketServer = null
+            encoder = null
         }
     }
 
     private val selfFrameListener = object : CameraWrapper.OnPreviewFrameListener {
         override fun onPreviewFrame(data: ByteArray, camera: Camera?) {
+            camera?.let {
+                if (isFinishing) return@onPreviewFrame
+            }
             if (socketServer == null) {
                 socketServer = LiveSocketServer(PeerInfo.PORT)
                 remotePlayer?.let {

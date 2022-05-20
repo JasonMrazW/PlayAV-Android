@@ -21,10 +21,6 @@ class H264RemotePlayer : Runnable , OnReceiveMessageListener {
 
     fun start(surface: Surface, width:Int = 1920, height:Int = 1080) {
         val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC,width, height)
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
-        format.setInteger(MediaFormat.KEY_FRAME_RATE, 30)
-        format.setInteger(MediaFormat.KEY_BIT_RATE, 5000*1000)
-        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)
         try {
             codec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)

@@ -60,6 +60,10 @@ class H264FrameVideoEncoder: Runnable {
         }
     }
 
+    fun stop() {
+        running.set(false)
+    }
+
     fun setOnDataEncodedListener(listener:OnDataEncodedListener) {
         this.listener = listener
     }

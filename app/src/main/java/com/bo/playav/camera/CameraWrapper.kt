@@ -15,18 +15,20 @@ import com.hjq.permissions.XXPermissions
 import java.lang.Exception
 import kotlin.properties.Delegates
 
-class CameraWrapper(private val preview: SurfaceView) {
+class CameraWrapper(private val preview: SurfaceView, private val rotate: Boolean = true) {
 
     private lateinit var camera: Camera
     private lateinit var byteBuffer: ByteArray
     private var previewFrameListener: OnPreviewFrameListener? = null
     private var width by Delegates.notNull<Int>()
     private var height by Delegates.notNull<Int>()
+    private var isRunning = false
 
     init {
         preview.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 startPreview(holder)
+                isRunning = true
             }
 
             override fun surfaceChanged(holder: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
@@ -34,7 +36,7 @@ class CameraWrapper(private val preview: SurfaceView) {
                     return
                 }
 
-                camera?.apply {
+                camera.apply {
                     stopPreview()
 
                     startPreview(holder)
@@ -42,7 +44,7 @@ class CameraWrapper(private val preview: SurfaceView) {
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                camera?.release()
+                isRunning = false
             }
 
         })
@@ -66,7 +68,9 @@ class CameraWrapper(private val preview: SurfaceView) {
     private fun startPreview(holder: SurfaceHolder) {
         camera?.apply {
             //setDisplayOrientation(90)
-            setCameraDisplayOrientation(preview.context, Camera.CameraInfo.CAMERA_FACING_BACK)
+            if (rotate) {
+                setCameraDisplayOrientation(preview.context, Camera.CameraInfo.CAMERA_FACING_BACK)
+            }
             addCallbackBuffer(byteBuffer)
             parameters.setPreviewFpsRange(30000,30000)
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
@@ -116,6 +120,10 @@ class CameraWrapper(private val preview: SurfaceView) {
         }
     }
 
+    fun release() {
+        camera.release()
+    }
+
     fun setOnPreviewFrameListener(listener: OnPreviewFrameListener) {
         previewFrameListener = listener
     }
@@ -123,14 +131,15 @@ class CameraWrapper(private val preview: SurfaceView) {
     private val previewCallback = object : Camera.PreviewCallback {
         override fun onPreviewFrame(p0: ByteArray?, p1: Camera?) {
             p0?.apply {
-                //convert NV21 to NV12
+                //convert NV21 to I420
                 //rotate by cpu
-//                val tmp = YUVUtil.convertNV21ToNV12(this)
-//                val ret = YUVUtil.rotate90(tmp, width, height)
-//                val tmp = YUVUtil.toNV12(this, width, height)
-                val tmp = YUVUtil.convertNV21ToI420(this, width, height)
-                val ret = YUVUtil.rotate90(tmp, width, height)
-                previewFrameListener?.onPreviewFrame(ret, p1)
+                if (!isRunning)return
+                var tmp = YUVUtil.convertNV21ToI420(this, width, height)
+                if (rotate) {
+                    tmp = YUVUtil.rotate90(tmp, width, height)
+                }
+
+                previewFrameListener?.onPreviewFrame(tmp, p1)
             }
 
             p1?.apply {

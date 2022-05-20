@@ -96,5 +96,74 @@ class YUVUtil {
             }
             return ret
         }
+
+        /**
+         * 顺时针旋转180度
+         */
+        fun rotate180(data:ByteArray, width: Int, height: Int): ByteArray {
+            var k = 0
+            val ret = ByteArray(data.size)
+
+            val hw = width / 2
+            val hh = height / 2
+            //copy y
+            for(j in height - 1 downTo 0)
+            {
+                for(i in width downTo 1)
+                {
+                    ret[k++] = data[width*j + i]
+                }
+            }
+            val frameSize = width * height
+            var length = width * height * 3 / 2 - 1;
+            for (i in length downTo frameSize step 2) {
+                ret[k++] = data[i - 1];
+                ret[k++] = data[i];
+            }
+
+            return ret
+        }
+
+        /**
+         * 顺时针旋转270度
+         */
+        fun rotate270(data:ByteArray, width: Int, height: Int): ByteArray {
+            val size = data.size
+            val ySize = width * height
+            var k = 0
+            val ret = ByteArray(data.size)
+
+            //copy y
+            for(j in width downTo 1)
+            {
+                for(i in 0 until height)
+                {
+                    ret[k++] = data[width*i + j]
+                }
+            }
+
+            val hw = width / 2
+            val hh = height / 2
+
+            var uStart = width * height
+            for(j in hw downTo 1)
+            {
+                for(i in 0 until hh-1)
+                {
+                    ret[k++] = data[uStart + hw*i + j]
+                }
+            }
+
+            //copy v
+            uStart += width * height / 4;
+            for(j in hw downTo 1)
+            {
+                for(i in 0 until hh-1)
+                {
+                    ret[k++] = data[uStart + hw*i + j]
+                }
+            }
+            return ret
+        }
     }
 }

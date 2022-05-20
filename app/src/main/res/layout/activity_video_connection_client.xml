@@ -21,8 +21,8 @@
 
     <SurfaceView
         android:id="@+id/self_preview"
-        android:layout_width="150dp"
-        android:layout_height="300dp"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentTop="true"/>
 </RelativeLayout>
