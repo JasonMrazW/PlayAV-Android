@@ -1,20 +1,27 @@
 package com.bo.playav.camera
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.graphics.ImageFormat
 import android.hardware.Camera
 import android.os.Build
 import android.util.Log
+import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import com.bo.playav.utils.YUVUtil
 import com.hjq.permissions.XXPermissions
 import java.lang.Exception
+import kotlin.properties.Delegates
 
 class CameraWrapper(private val preview: SurfaceView) {
 
     private lateinit var camera: Camera
     private lateinit var byteBuffer: ByteArray
     private var previewFrameListener: OnPreviewFrameListener? = null
+    private var width by Delegates.notNull<Int>()
+    private var height by Delegates.notNull<Int>()
 
     init {
         preview.holder.addCallback(object : SurfaceHolder.Callback {
@@ -47,6 +54,8 @@ class CameraWrapper(private val preview: SurfaceView) {
             camera?.let {
                 val size = it.parameters.previewSize
                 byteBuffer = ByteArray(size.width * size.height * 3/2)
+                width = size.width
+                height = size.height
             }
 
         } catch (e: Exception) {
@@ -56,20 +65,38 @@ class CameraWrapper(private val preview: SurfaceView) {
 
     private fun startPreview(holder: SurfaceHolder) {
         camera?.apply {
-            setDisplayOrientation(90)
+            //setDisplayOrientation(90)
+            setCameraDisplayOrientation(preview.context, Camera.CameraInfo.CAMERA_FACING_BACK)
             addCallbackBuffer(byteBuffer)
             parameters.setPreviewFpsRange(30000,30000)
-//            for (i  in parameters.supportedPreviewFpsRange) {
-//                for (j in i) {
-//                    Log.d("fps", "range: $j")
-//                }
-//                Log.d("fps", "======")
-//            }
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            parameters.setPreviewFormat(ImageFormat.NV21)
             setPreviewCallbackWithBuffer(previewCallback)
             setPreviewDisplay(holder)
             startPreview()
         }
 
+    }
+
+    fun setCameraDisplayOrientation(context: Context, cameraId:Int) {
+        val info =  Camera.CameraInfo()
+        Camera.getCameraInfo(cameraId, info)
+        val rotation = (context as Activity).windowManager.defaultDisplay.rotation
+        var degree = 0
+        when (rotation) {
+            Surface.ROTATION_0 -> degree = 0
+            Surface.ROTATION_90 -> degree = 90
+            Surface.ROTATION_180 -> degree = 180
+            Surface.ROTATION_270 -> degree = 270
+        }
+        var displayDegree = 0
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            displayDegree = (info.orientation + degree)% 360
+            displayDegree = (360 - displayDegree) % 360
+        } else {
+            displayDegree = (info.orientation - degree + 360) % 360
+        }
+        camera.setDisplayOrientation(displayDegree)
     }
 
 
@@ -95,10 +122,15 @@ class CameraWrapper(private val preview: SurfaceView) {
 
     private val previewCallback = object : Camera.PreviewCallback {
         override fun onPreviewFrame(p0: ByteArray?, p1: Camera?) {
-            Log.d("camerawrapper", "frame has bean render")
-
             p0?.apply {
-                previewFrameListener?.onPreviewFrame(this, p1)
+                //convert NV21 to NV12
+                //rotate by cpu
+//                val tmp = YUVUtil.convertNV21ToNV12(this)
+//                val ret = YUVUtil.rotate90(tmp, width, height)
+//                val tmp = YUVUtil.toNV12(this, width, height)
+                val tmp = YUVUtil.convertNV21ToI420(this, width, height)
+                val ret = YUVUtil.rotate90(tmp, width, height)
+                previewFrameListener?.onPreviewFrame(ret, p1)
             }
 
             p1?.apply {

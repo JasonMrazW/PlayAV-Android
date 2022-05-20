@@ -12,7 +12,6 @@
         android:layout_height="64dp"
         android:text="播放H264文件"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:onClick="playH264"/>
 
     <Button
@@ -37,7 +36,7 @@
         android:id="@+id/videoConnectionRecorder"
         android:layout_width="200dp"
         android:layout_height="64dp"
-        android:text="视频通话"
+        android:text="视频通话-Server"
         android:layout_below="@+id/cameraRecorder"
         android:layout_alignLeft="@+id/screenRecorder"
         android:onClick="playVideoConnectionRecorder"/>
@@ -46,7 +45,7 @@
         android:id="@+id/videoConnectionClientRecorder"
         android:layout_width="200dp"
         android:layout_height="64dp"
-        android:text="视频通话"
+        android:text="视频通话-Client"
         android:layout_below="@+id/videoConnectionRecorder"
         android:layout_alignLeft="@+id/screenRecorder"
         android:onClick="playVideoConnectionClientRecorder"/>

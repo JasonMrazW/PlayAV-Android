@@ -4,6 +4,7 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
+import com.bo.playav.utils.YUVUtil
 import java.lang.RuntimeException
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
@@ -31,7 +32,8 @@ class H264FrameVideoEncoder: Runnable {
             width, height)
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 30)
-        format.setInteger(MediaFormat.KEY_BIT_RATE, 2000*1000)
+        format.setInteger(MediaFormat.KEY_BIT_RATE, 5000*1000)
+        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)
 
         codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
@@ -70,6 +72,10 @@ class H264FrameVideoEncoder: Runnable {
             val outputIndex = codec.dequeueOutputBuffer(mediaInfo, 1000)
             if (outputIndex >= 0) {
                 codec.getOutputBuffer(outputIndex)?.let {
+//                    val byteArray = ByteArray(it.remaining())
+//                    it.get(byteArray)
+//                    YUVUtil.writeBytes(byteArray)
+
                     var offset = 4
                     if (it.get(2).toInt() == 0x01) {
                         offset = 3
