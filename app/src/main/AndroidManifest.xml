@@ -21,10 +21,10 @@
         android:theme="@style/Theme.PlayAVAndroid"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name=".view.VideoConnectionClientActivity"
+            android:name=".view.communication.VideoConnectionClientActivity"
             android:exported="false" />
         <activity
-            android:name=".view.VideoConnectionActivity"
+            android:name=".view.communication.VideoConnectionActivity"
             android:exported="false" />
         <activity
             android:name=".view.CameraRecorderActivity"

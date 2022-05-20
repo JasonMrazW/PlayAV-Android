@@ -1,4 +1,4 @@
-package com.bo.playav.view
+package com.bo.playav.view.communication
 
 import android.hardware.Camera
 import androidx.appcompat.app.AppCompatActivity

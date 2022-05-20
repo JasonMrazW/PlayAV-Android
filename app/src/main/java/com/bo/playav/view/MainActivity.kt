@@ -3,8 +3,9 @@ package com.bo.playav.view
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.bo.playav.R
 import com.bo.playav.databinding.ActivityMainBinding
+import com.bo.playav.view.communication.VideoConnectionActivity
+import com.bo.playav.view.communication.VideoConnectionClientActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
