@@ -81,7 +81,7 @@ class VideoConnectionClientActivity : AppCompatActivity() {
 
     private val peerPreviewCallback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(p0: SurfaceHolder) {
-            remotePlayer.start(p0.surface, 1080, 1920)
+            remotePlayer.start(p0.surface, 1920, 1080)
         }
 
         override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {

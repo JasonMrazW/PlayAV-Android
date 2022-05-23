@@ -2,6 +2,7 @@ package com.bo.playav.encoder
 
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
+import android.media.MediaCodecInfo.CodecCapabilities
 import android.media.MediaFormat
 import android.util.Log
 import com.bo.playav.utils.YUVUtil
@@ -34,11 +35,19 @@ class H264FrameVideoEncoder: Runnable {
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 30)
         format.setInteger(MediaFormat.KEY_BIT_RATE, 5000*1000)
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)
+        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, CodecCapabilities.COLOR_FormatYUV420Flexible)
 
+        showSupportedColorFormat(codec.codecInfo.getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC))
         codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
         codec.start()
         Thread(this).start()
+    }
+
+    private fun showSupportedColorFormat(caps: CodecCapabilities) {
+        Log.d("encoder", "supported color format: ")
+        for (c in caps.colorFormats) {
+            Log.d("encoder", "${c.toString()}")
+        }
     }
 
     fun encodeFrame(data: ByteArray) {
