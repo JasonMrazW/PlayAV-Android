@@ -45,15 +45,15 @@ class YUVUtil {
             return ret
         }
 
-        fun writeBytes(array: ByteArray?) {
+        fun writeBytes(array: ByteArray?, fileName:String) {
+
             var writer: FileOutputStream? = null
             try {
                 // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
                 writer = FileOutputStream(
-                    Environment.getExternalStorageDirectory().toString() + "/codec.h264", true
+                    Environment.getExternalStorageDirectory().toString() + "/" + fileName, true
                 )
                 writer.write(array)
-                writer.write('\n'.toInt())
             } catch (e: IOException) {
                 e.printStackTrace()
             } finally {

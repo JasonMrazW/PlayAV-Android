@@ -85,10 +85,10 @@ class H264SurfaceVideoEncoder : Runnable{
                                 val ret = ByteBuffer.allocate(sps_pps_buffer.size)
                                 ret.put(sps_pps_buffer, 0, sps_pps_buffer.size)
                                 ret.flip()
-                                listener?.onDataEncoded(ret)
-                                listener?.onDataEncoded(it)
+                                listener?.onVideoDataEncoded(ret)
+                                listener?.onVideoDataEncoded(it)
                             } else {
-                                listener?.onDataEncoded(it)
+                                listener?.onVideoDataEncoded(it)
                             }
                         }
                         MediaFormat.MIMETYPE_VIDEO_AVC -> {
@@ -101,10 +101,10 @@ class H264SurfaceVideoEncoder : Runnable{
                                 val ret = ByteBuffer.allocate(sps_pps_buffer.size)
                                 ret.put(sps_pps_buffer, 0, sps_pps_buffer.size)
                                 ret.flip()
-                                listener?.onDataEncoded(ret)
-                                listener?.onDataEncoded(it)
+                                listener?.onVideoDataEncoded(ret)
+                                listener?.onVideoDataEncoded(it)
                             } else {
-                                listener?.onDataEncoded(it)
+                                listener?.onVideoDataEncoded(it)
                             }
                         }
                         else -> {}

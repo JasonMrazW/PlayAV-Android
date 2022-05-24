@@ -40,7 +40,7 @@ class LiveSocketClient(uri:URI):WebSocketClient(uri), OnDataEncodedListener {
         messageListener = listener
     }
 
-    override fun onDataEncoded(data: ByteBuffer) {
+    override fun onVideoDataEncoded(data: ByteBuffer) {
         //send data to server
         if (isOpen) {
             Log.d("player", "send data: ${data?.get(0)} " +
@@ -51,5 +51,9 @@ class LiveSocketClient(uri:URI):WebSocketClient(uri), OnDataEncodedListener {
                     " ${data?.get(5)}" + "size: ${data?.remaining()}")
             send(data)
         }
+    }
+
+    override fun onAudioDataEncoded(data: ByteBuffer) {
+        TODO("Not yet implemented")
     }
 }

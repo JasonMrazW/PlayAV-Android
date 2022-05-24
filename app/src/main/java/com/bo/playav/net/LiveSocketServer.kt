@@ -45,8 +45,11 @@ class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), OnDa
         Log.d("socket", "listening..")
     }
 
-    override fun onDataEncoded(data: ByteBuffer) {
+    override fun onVideoDataEncoded(data: ByteBuffer) {
         client?.send(data)
-        //Log.d("socket", "send  ${data.remaining()}")
+    }
+
+    override fun onAudioDataEncoded(data: ByteBuffer) {
+
     }
 }
