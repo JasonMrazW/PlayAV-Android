@@ -2,6 +2,8 @@ package com.bo.playav.net
 
 import android.util.Log
 import com.bo.playav.encoder.OnDataEncodedListener
+import com.bo.playav.net.OnReceiveFrameListener.Companion.AUDIO
+import com.bo.playav.net.OnReceiveFrameListener.Companion.VIDEO
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.lang.Exception
@@ -9,7 +11,8 @@ import java.net.URI
 import java.nio.ByteBuffer
 
 class LiveSocketClient(uri:URI):WebSocketClient(uri), OnDataEncodedListener {
-    var messageListener:OnReceiveMessageListener ? = null
+    var videoFrameListener:OnReceiveFrameListener? = null
+    var audioFrameListener:OnReceiveFrameListener? = null
 
     override fun onOpen(handshakedata: ServerHandshake?) {
     }
@@ -19,13 +22,23 @@ class LiveSocketClient(uri:URI):WebSocketClient(uri), OnDataEncodedListener {
     }
 
     override fun onMessage(data: ByteBuffer?) {
-        Log.d("player", "receive: ${data?.get(0)} " +
-                " ${data?.get(1)}" +
-                " ${data?.get(2)}" +
-                " ${data?.get(3)}" +
-                " ${data?.get(4)}" +
-                " ${data?.get(5)}" + "size: ${data?.remaining()}")
-        messageListener?.onReceive(data)
+
+        data?.let {
+            val type = data.get(0)
+            val byteArray = ByteArray(it.remaining()-1)
+            data.position(1)
+            data.get(byteArray)
+
+            val byteBuffer = ByteBuffer.allocate(byteArray.size)
+            byteBuffer.put(byteArray)
+            byteBuffer.flip()
+
+            if (type == VIDEO) {
+                videoFrameListener?.onReceiveFrame(byteBuffer)
+            } else {
+                audioFrameListener?.onReceiveFrame(byteBuffer)
+            }
+        }
     }
 
     override fun onClose(code: Int, reason: String?, remote: Boolean) {
@@ -33,27 +46,32 @@ class LiveSocketClient(uri:URI):WebSocketClient(uri), OnDataEncodedListener {
     }
 
     override fun onError(ex: Exception?) {
-        Log.d("player", "send 222error: ${ex?.message}")
-    }
-
-    fun setReceiveListener(listener: OnReceiveMessageListener) {
-        messageListener = listener
+        Log.e("player", "error: ${ex?.message}")
+        ex?.apply {
+            for (trace in stackTrace) {
+                Log.e("player", "        $trace.methodName")
+            }
+        }
     }
 
     override fun onVideoDataEncoded(data: ByteBuffer) {
         //send data to server
         if (isOpen) {
-            Log.d("player", "send data: ${data?.get(0)} " +
-                    " ${data?.get(1)}" +
-                    " ${data?.get(2)}" +
-                    " ${data?.get(3)}" +
-                    " ${data?.get(4)}" +
-                    " ${data?.get(5)}" + "size: ${data?.remaining()}")
-            send(data)
+            val sendData = ByteBuffer.allocate(data.remaining() + 1)
+            sendData.put(VIDEO)
+            sendData.put(data)
+            sendData.flip()
+            send(sendData)
         }
     }
 
-    override fun onAudioDataEncoded(data: ByteBuffer) {
-        TODO("Not yet implemented")
+    override fun onAudioDataEncoded(data: ByteArray) {
+        if (isOpen) {
+            val sendData = ByteBuffer.allocate(data.size + 1)
+            sendData.put(AUDIO)
+            sendData.put(data)
+            sendData.flip()
+            send(sendData)
+        }
     }
 }

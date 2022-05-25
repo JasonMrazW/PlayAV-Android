@@ -12,6 +12,7 @@ import com.bo.playav.databinding.ActivityVideoConnectionBinding
 import com.bo.playav.encoder.AACAudioEncoder
 import com.bo.playav.encoder.H264FrameVideoEncoder
 import com.bo.playav.net.LiveSocketServer
+import com.bo.playav.player.AACAudioPlayer
 import com.bo.playav.player.H264RemotePlayer
 import com.bo.playav.recorder.AudioRecorder
 import com.hjq.permissions.XXPermissions
@@ -29,7 +30,9 @@ class VideoConnectionActivity : AppCompatActivity() {
     private var videoEncoder: H264FrameVideoEncoder? = null
     private var audioEncoder: AACAudioEncoder? = null
     private lateinit var audioRecorder: AudioRecorder
+
     private var remotePlayer: H264RemotePlayer? = null
+    private var audioPlayer: AACAudioPlayer? = null
 
     private var socketServer: LiveSocketServer? = null
 
@@ -94,9 +97,14 @@ class VideoConnectionActivity : AppCompatActivity() {
         }
 
         override fun surfaceDestroyed(p0: SurfaceHolder) {
-            remotePlayer?.stop()
+            remotePlayer?.stopPlaying()
             socketServer?.stop()
             videoEncoder?.stop()
+
+            audioEncoder?.stop()
+            audioRecorder.stop()
+            audioPlayer?.stop()
+
             socketServer = null
             videoEncoder = null
         }
@@ -110,7 +118,7 @@ class VideoConnectionActivity : AppCompatActivity() {
             if (socketServer == null) {
                 socketServer = LiveSocketServer(PeerInfo.PORT)
                 remotePlayer?.let {
-                    socketServer?.setOnReceiveMessageListener(it)
+                    socketServer?.videoFrameListener = it
                 }
 
                 socketServer?.start()
@@ -120,9 +128,21 @@ class VideoConnectionActivity : AppCompatActivity() {
                     videoEncoder?.start(parameters.previewSize.height, parameters.previewSize.width)
 
                     audioEncoder = AACAudioEncoder()
+                    //recorder -> encoder
                     audioRecorder.listener = audioEncoder
+
+                    //encoder -> server
+                    audioEncoder?.listener = socketServer
+
                     audioEncoder?.start(audioRecorder.bufferSize)
                     audioRecorder.start()
+
+                    audioPlayer = AACAudioPlayer()
+                    audioPlayer?.audioSessionId = audioRecorder.sessionId
+                    //socket -> player
+                    socketServer?.audioFrameListener = audioPlayer
+
+
                     Log.d("camera preview", "${parameters.previewSize.width} + ${parameters.previewSize.height}")
                 }
             }

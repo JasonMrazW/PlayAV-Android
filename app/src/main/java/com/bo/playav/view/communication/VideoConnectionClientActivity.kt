@@ -1,17 +1,22 @@
 package com.bo.playav.view.communication
 
 import android.hardware.Camera
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceHolder
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.bo.playav.camera.CameraWrapper
 import com.bo.playav.camera.PeerInfo
 import com.bo.playav.databinding.ActivityVideoConnectionClientBinding
+import com.bo.playav.encoder.AACAudioEncoder
 import com.bo.playav.encoder.H264FrameVideoEncoder
 import com.bo.playav.net.LiveSocketClient
+import com.bo.playav.player.AACAudioPlayer
 import com.bo.playav.player.H264RemotePlayer
+import com.bo.playav.recorder.AudioRecorder
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
@@ -22,6 +27,10 @@ class VideoConnectionClientActivity : AppCompatActivity() {
     private lateinit var cameraWrapper: CameraWrapper
     private var encoder: H264FrameVideoEncoder? = null
     private lateinit var remotePlayer: H264RemotePlayer
+
+    private var audioEncoder: AACAudioEncoder? = null
+    private lateinit var audioRecorder: AudioRecorder
+    private var audioPlayer: AACAudioPlayer? = null
 
     private var socketClient: LiveSocketClient? = null
 
@@ -39,6 +48,8 @@ class VideoConnectionClientActivity : AppCompatActivity() {
         cameraWrapper.setOnPreviewFrameListener(selfFrameListener)
         cameraWrapper.start(this)
 
+        audioRecorder = AudioRecorder()
+
         checkPermission()
     }
 
@@ -53,6 +64,7 @@ class VideoConnectionClientActivity : AppCompatActivity() {
             //.permission(Permission.Group.STORAGE)
             // 适配 Android 11 需要这样写，这里无需再写 Permission.Group.STORAGE
             .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+            .permission(Permission.RECORD_AUDIO)
             .request(object : OnPermissionCallback {
                 override fun onGranted(permissions: List<String>, all: Boolean) {
                     if (all) {
@@ -72,9 +84,17 @@ class VideoConnectionClientActivity : AppCompatActivity() {
             })
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun callServer(view: android.view.View) {
         socketClient = LiveSocketClient(URI(PeerInfo.ADDRESS))
-        socketClient?.setReceiveListener(remotePlayer)
+        //socket -> video player
+        socketClient?.videoFrameListener = remotePlayer
+        //socket -> aac audio player
+        audioPlayer = AACAudioPlayer()
+        audioPlayer?.start()
+        socketClient?.audioFrameListener = audioPlayer
+
+        //encoder -> socket
         encoder?.setOnDataEncodedListener(socketClient!!)
         socketClient?.connect()
     }
@@ -88,10 +108,14 @@ class VideoConnectionClientActivity : AppCompatActivity() {
         }
 
         override fun surfaceDestroyed(p0: SurfaceHolder) {
-            remotePlayer.stop()
+            remotePlayer.stopPlaying()
             socketClient?.close(1000)
             encoder?.stop()
             encoder = null
+
+            audioEncoder?.stop()
+            audioRecorder.stop()
+            audioPlayer?.stop()
         }
     }
 
@@ -102,6 +126,18 @@ class VideoConnectionClientActivity : AppCompatActivity() {
                     encoder = H264FrameVideoEncoder()
                     encoder?.start(parameters.previewSize.width, parameters.previewSize.height)
                     Log.d("camera preview", "${parameters.previewSize.width} + ${parameters.previewSize.height}")
+
+                    audioEncoder = AACAudioEncoder()
+                    //encoder -> socket
+                    audioEncoder?.listener = socketClient
+
+                    //recoder -> encoder
+                    audioRecorder.listener = audioEncoder
+
+                    //start
+                    audioEncoder?.start(audioRecorder.bufferSize)
+
+                    audioRecorder.start()
                 }
             }
 

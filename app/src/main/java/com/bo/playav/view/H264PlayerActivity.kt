@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.SurfaceHolder
 import com.bo.playav.databinding.ActivityH264PlayerBinding
 import com.bo.playav.net.LiveSocketClient
-import com.bo.playav.player.H264LocalPlayer
 import com.bo.playav.player.H264RemotePlayer
 import java.net.URI
 
@@ -25,7 +24,7 @@ class H264PlayerActivity : AppCompatActivity() {
         }
 
         override fun surfaceDestroyed(holder: SurfaceHolder) {
-            h264Player.stop()
+            h264Player.stopPlaying()
             liveSocketClient.close(1000)
         }
 
@@ -40,7 +39,7 @@ class H264PlayerActivity : AppCompatActivity() {
         binding.preview.holder.addCallback(callback)
         h264Player = H264RemotePlayer()
         liveSocketClient = LiveSocketClient(URI("ws://192.168.0.155:9015"))
-        liveSocketClient.setReceiveListener(h264Player)
+        liveSocketClient.videoFrameListener = h264Player
         liveSocketClient.connect()
     }
 }

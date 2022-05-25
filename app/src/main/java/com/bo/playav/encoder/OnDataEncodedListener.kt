@@ -11,5 +11,5 @@ interface OnDataEncodedListener {
     /**
      * 音频数据编码好
      */
-    fun onAudioDataEncoded(data: ByteBuffer)
+    fun onAudioDataEncoded(data: ByteArray)
 }

@@ -3,12 +3,15 @@ package com.bo.playav.encoder
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
+import android.media.audiofx.AcousticEchoCanceler
 import android.util.Log
+import com.bo.playav.audio.AECUtils
 import com.bo.playav.config.AudioConfigInfo
 import com.bo.playav.recorder.OnPCMDataAvaliableListener
 import com.bo.playav.toHex
 import com.bo.playav.utils.YUVUtil
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
@@ -18,7 +21,7 @@ class AACAudioEncoder : Runnable, OnPCMDataAvaliableListener{
     private lateinit var codec:MediaCodec
     private val running = AtomicBoolean(false)
 
-    private var listener: OnDataEncodedListener? = null
+    var listener: OnDataEncodedListener? = null
     private var pts by Delegates.notNull<Long>()
 
     companion object {
@@ -28,14 +31,8 @@ class AACAudioEncoder : Runnable, OnPCMDataAvaliableListener{
     fun start(bufferSize:Int) {
         codec = MediaCodec.createEncoderByType(AudioConfigInfo.AAC_TYPE)
 
-        val format = MediaFormat.createAudioFormat(AudioConfigInfo.AAC_TYPE, AudioConfigInfo.SAMPLE_RATE,
-            AudioConfigInfo.CHANNEL_COUNT)
+        val format = AudioConfigInfo.buildAudioFormat()
         try {
-            format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
-            format.setInteger(MediaFormat.KEY_CHANNEL_MASK, AudioConfigInfo.CHANNEL_LAYOUT)
-            format.setInteger(MediaFormat.KEY_BIT_RATE, AudioConfigInfo.AUDIO_BITRATE)
-            format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 2)
-            format.setInteger(MediaFormat.KEY_SAMPLE_RATE, AudioConfigInfo.SAMPLE_RATE)
             format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize * 2)
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             Thread(this).start()
@@ -74,9 +71,9 @@ class AACAudioEncoder : Runnable, OnPCMDataAvaliableListener{
                     //add aac body
                     it.get(byteArray, 7, aacLength)
 
-                    YUVUtil.writeBytes(byteArray, "out.aac")
+                    //YUVUtil.writeBytes(byteArray, "out.aac")
 
-                    listener?.onAudioDataEncoded(it)
+                    listener?.onAudioDataEncoded(byteArray)
 
                     it.clear()
                 }
@@ -84,6 +81,7 @@ class AACAudioEncoder : Runnable, OnPCMDataAvaliableListener{
             }
         }
         codec.stop()
+        running.set(false)
     }
 
     /**
@@ -108,27 +106,33 @@ class AACAudioEncoder : Runnable, OnPCMDataAvaliableListener{
     }
 
     override fun onPCMAvaliable(data: ByteBuffer, length:Int) {
+        if (!running.get()) return
         var offset = 0
 
         while (offset < length) {
-            val index = codec.dequeueInputBuffer(1000)
-            if (index >= 0) {
-                val buffer = codec.getInputBuffer(index)
-                buffer?.let {
-                    var bufferLength = 0
-                    if ((offset + it.remaining()) < length) {
-                        bufferLength = it.remaining()
-                    } else {
-                        bufferLength = length - offset
-                    }
-                    val tmp = ByteArray(bufferLength)
-                    data.get(tmp)
-                    it.put(tmp)
-                    pts = (System.nanoTime()) / 1000L
-                    codec.queueInputBuffer(index, 0, bufferLength, pts, 0)
+            try {
+                val index = codec.dequeueInputBuffer(1000)
+                if (index >= 0) {
+                    val buffer = codec.getInputBuffer(index)
+                    buffer?.let {
+                        var bufferLength = 0
+                        if ((offset + it.remaining()) < length) {
+                            bufferLength = it.remaining()
+                        } else {
+                            bufferLength = length - offset
+                        }
+                        val tmp = ByteArray(bufferLength)
+                        data.get(tmp)
+                        it.put(tmp)
+                        pts = (System.nanoTime()) / 1000L
+                        codec.queueInputBuffer(index, 0, bufferLength, pts, 0)
 
-                    offset += bufferLength
+                        offset += bufferLength
+                    }
+
                 }
+            } catch (ex:IllegalStateException) {
+                Log.e(TAG, "enqueue input buffer failed cause of ${ex.message}")
 
             }
         }

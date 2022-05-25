@@ -11,11 +11,8 @@ import java.nio.ByteBuffer
 
 class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), OnDataEncodedListener {
     var client: WebSocket? = null
-    private var listener:OnReceiveMessageListener? = null
-
-    fun setOnReceiveMessageListener(l: OnReceiveMessageListener) {
-        listener = l
-    }
+    var videoFrameListener:OnReceiveFrameListener? = null
+    var audioFrameListener:OnReceiveFrameListener? = null
 
     override fun onOpen(conn: WebSocket?, handshake: ClientHandshake?) {
         Log.d("socket", "connect new client!!")
@@ -31,10 +28,25 @@ class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), OnDa
 
     }
 
-    override fun onMessage(conn: WebSocket?, message: ByteBuffer?) {
+    override fun onMessage(conn: WebSocket?, data: ByteBuffer?) {
         //收到对方发来的消息
-        Log.d("socket", "receive.. ${message?.remaining()}")
-        listener?.onReceive(message)
+        Log.d("socket", "receive.. ${data?.remaining()}")
+        data?.let {
+            val type = data.get(0)
+            val byteArray = ByteArray(it.remaining()-1)
+            data.position(1)
+            data.get(byteArray)
+
+            val byteBuffer = ByteBuffer.allocate(byteArray.size)
+            byteBuffer.put(byteArray)
+            byteBuffer.flip()
+
+            if (type == OnReceiveFrameListener.VIDEO) {
+                videoFrameListener?.onReceiveFrame(byteBuffer)
+            } else {
+                audioFrameListener?.onReceiveFrame(byteBuffer)
+            }
+        }
     }
 
     override fun onError(conn: WebSocket?, ex: Exception?) {
@@ -46,10 +58,27 @@ class LiveSocketServer(port:Int): WebSocketServer(InetSocketAddress(port)), OnDa
     }
 
     override fun onVideoDataEncoded(data: ByteBuffer) {
-        client?.send(data)
+        //send data to server
+        val sendData = ByteBuffer.allocate(data.remaining() + 1)
+        sendData.put(OnReceiveFrameListener.VIDEO)
+        sendData.put(data)
+        sendData.flip()
+        client?.let {
+            if (it.isOpen) {
+                it.send(sendData)
+            }
+        }
     }
 
-    override fun onAudioDataEncoded(data: ByteBuffer) {
-
+    override fun onAudioDataEncoded(data: ByteArray) {
+        val sendData = ByteBuffer.allocate(data.size + 1)
+        sendData.put(OnReceiveFrameListener.AUDIO)
+        sendData.put(data)
+        sendData.flip()
+        client?.let {
+            if (it.isOpen) {
+                it.send(sendData)
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.util.Log
+import com.bo.playav.audio.AECUtils
 import com.bo.playav.config.AudioConfigInfo.Companion.CHANNEL_COUNT
 import com.bo.playav.config.AudioConfigInfo.Companion.CHANNEL_LAYOUT
 import com.bo.playav.config.AudioConfigInfo.Companion.FORMAT
@@ -13,6 +14,7 @@ import com.bo.playav.config.AudioConfigInfo.Companion.SOURCE
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.properties.Delegates
 
 class AudioRecorder : Runnable{
     private lateinit var recorder:AudioRecord
@@ -20,6 +22,7 @@ class AudioRecorder : Runnable{
     private val running = AtomicBoolean(false)
     private lateinit var audioBuffer: ByteBuffer
     var listener: OnPCMDataAvaliableListener? = null
+    var sessionId by Delegates.notNull<Int>()
 
     @SuppressLint("MissingPermission")
     fun start() {
@@ -29,6 +32,8 @@ class AudioRecorder : Runnable{
 
         bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_LAYOUT, FORMAT)*4
         recorder = AudioRecord(SOURCE, SAMPLE_RATE,CHANNEL_LAYOUT, FORMAT, bufferSize)
+
+        sessionId = recorder.audioSessionId
 
         audioBuffer = ByteBuffer.allocateDirect(bufferSize)
         running.set(true)
