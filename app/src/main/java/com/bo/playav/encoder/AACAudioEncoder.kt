@@ -69,9 +69,9 @@ class AACAudioEncoder : Runnable, OnPCMDataAvaliableListener{
                     //add header
                     addADTStoPacket(byteArray, 2, 4, 2, frameSize)
                     //add aac body
-                    it.get(byteArray, 7, aacLength)
+                    it.get(byteArray, aacHeaderLength, aacLength)
 
-                    //YUVUtil.writeBytes(byteArray, "out.aac")
+                    YUVUtil.writeBytes(byteArray, "out.aac")
 
                     listener?.onAudioDataEncoded(byteArray)
 

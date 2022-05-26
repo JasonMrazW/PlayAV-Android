@@ -18,8 +18,6 @@ class AudioConfigInfo {
                 format.setInteger(MediaFormat.KEY_AAC_PROFILE, PROFILE)
                 format.setInteger(MediaFormat.KEY_CHANNEL_MASK, CHANNEL_LAYOUT)
                 format.setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BITRATE)
-                format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, CHANNEL_COUNT)
-                format.setInteger(MediaFormat.KEY_SAMPLE_RATE, SAMPLE_RATE)
             return format
         }
     }

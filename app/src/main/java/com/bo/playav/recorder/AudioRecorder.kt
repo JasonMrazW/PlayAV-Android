@@ -30,7 +30,8 @@ class AudioRecorder : Runnable{
             stop()
         }
 
-        bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_LAYOUT, FORMAT)*4
+//        bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_LAYOUT, FORMAT)*4
+        bufferSize = 16/8 * 1024 * 2 * 4
         recorder = AudioRecord(SOURCE, SAMPLE_RATE,CHANNEL_LAYOUT, FORMAT, bufferSize)
 
         sessionId = recorder.audioSessionId

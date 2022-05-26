@@ -6,26 +6,26 @@ import java.nio.ByteBuffer
 class WebsocketAudioVideoProxy(private val client: WebSocket) {
     var videoFrameListener:OnReceiveFrameListener? = null
     var audioFrameListener:OnReceiveFrameListener? = null
-    var age:Int = 0
 
     /**
      * 收到外部传递的音视频数据
      */
     fun onReceiveAudioVideoFrame(data:ByteBuffer) {
-        val type = data.get(0)
-        val byteArray = ByteArray(data.remaining()-1)
-        data.position(1)
-        data.get(byteArray)
-
-        val byteBuffer = ByteBuffer.allocate(byteArray.size)
-        byteBuffer.put(byteArray)
-        byteBuffer.flip()
-
-        if (type == VIDEO) {
-            videoFrameListener?.onReceiveFrame(byteBuffer)
+        if (isNALUData(data)) {
+            videoFrameListener?.onReceiveFrame(data)
         } else {
-            audioFrameListener?.onReceiveFrame(byteBuffer)
+            audioFrameListener?.onReceiveFrame(data)
         }
+    }
+
+    fun isNALUData(source: ByteBuffer): Boolean {
+        var i = 0;
+        val a_value = (0x00).toByte()
+        val b_value = (0x01).toByte()
+        //start code：00 00 00 01 or 00 00 01
+        return (source[i] == a_value && source[i+1] == a_value && source[i+2] == a_value
+                && source[i+3] == b_value) ||
+                (source[i] == a_value && source[i+1] == a_value && source[i+2] == b_value)
     }
 
     /**
@@ -39,24 +39,16 @@ class WebsocketAudioVideoProxy(private val client: WebSocket) {
      * 向外发送音频数据
      */
     fun sendAudioData(data: ByteArray) {
-        val sendData = ByteBuffer.allocate(data.size + 1)
-        sendData.put(AUDIO)
-        sendData.put(data)
-        sendData.flip()
         client.let {
             if (it.isOpen) {
-                it.send(sendData)
+                it.send(data)
             }
         }
     }
 
     private fun sendData(data: ByteBuffer, type:Byte) {
         if (client.isOpen) {
-            val sendData = ByteBuffer.allocate(data.remaining() + 1)
-            sendData.put(type)
-            sendData.put(data)
-            sendData.flip()
-            client.send(sendData)
+            client.send(data)
         }
     }
 
